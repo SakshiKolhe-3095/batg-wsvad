@@ -2,14 +2,15 @@ data/raw/
 data/features/
 checkpoints/
 
+.venv/
+
 *.pt
 *.pth
+*.log
 *.pyc
 
 __pycache__/
 .ipynb_checkpoints/
-
-.venv/
 
 runs/
 wandb/
