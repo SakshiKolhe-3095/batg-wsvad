@@ -1,0 +1,48 @@
+# ============================================================
+# BATG-WSVAD requirements.txt
+# NOTE: torch/torchvision pinned version TBD — waiting on
+# Mumtaj's `nvidia-smi` + CUDA check on RTX 4050 (today's task).
+# Once confirmed, replace the line below with exact pinned version,
+# e.g. torch==2.3.1+cu121 (match Colab/AI Kosh too, check there).
+# ============================================================
+
+# --- Core deep learning ---
+torch                  # PIN AFTER GPU CHECK, e.g. torch==2.3.1
+torchvision             # match torch version exactly
+torchaudio              # match torch version exactly (optional, harmless if unused)
+
+# --- Numerical / data handling ---
+numpy==1.26.4
+pandas==2.2.2
+scipy==1.13.1
+
+# --- Video / feature processing ---
+opencv-python==4.10.0.84
+decord==0.6.0           # fast video frame reading, lighter than full opencv decode loop
+
+# --- Model efficiency measurement (core to BATG experiments) ---
+fvcore==0.1.5.post20221221   # FLOPs counting (Facebook's lib, used by many VAD repos)
+ptflops==0.7.3                # alternative/cross-check FLOPs counter
+
+# --- Training utilities ---
+scikit-learn==1.5.0     # AUC computation, metrics
+tqdm==4.66.4             # progress bars
+PyYAML==6.0.1            # configs/*.yaml loading
+
+# --- Plotting (tradeoff curve figures) ---
+matplotlib==3.9.0
+seaborn==0.13.2
+
+# --- Experiment tracking / logging ---
+tensorboard==2.17.0      # optional but useful for training curves
+
+# --- Reproducibility / misc ---
+einops==0.8.0            # tensor reshaping, common in attention/gating modules
+
+# ============================================================
+# Baseline-specific notes (NOT installed via this file):
+# - RTFM, Sultani (ekosman), DE-Net each have their own repo;
+#   check each baseline's own requirements before running them.
+#   If conflicts arise, give that baseline its own venv instead
+#   of forcing one shared env across all repos.
+# ============================================================
