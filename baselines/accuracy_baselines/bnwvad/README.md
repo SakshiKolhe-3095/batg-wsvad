@@ -34,3 +34,13 @@ particular, the proposed DFM criterion is also discriminative for anomaly recogn
 ## Thanks to
 
 - [UR-DMU](https://github.com/henrryzh1/UR-DMU)
+
+
+## BATG Project Notes
+**Cloned:** 2026-06-22
+**Commit:** 4fa3a5dfb139d5c97a0511016110f15058d7c235
+**Role:** Accuracy sanity-check baseline (strong modern WS-VAD, 87.24% AUC UCF-Crime)
+**Features needed:** UCF-Crime 10-crop I3D from DeepMIL — Mumtaj already has these downloaded ✅
+**Pretrained checkpoint:** ckpts/xd_best.pkl = XD-Violence only, not UCF-Crime
+**For UCF-Crime:** need to train from scratch using Mumtaj's downloaded features
+**Patches made:** None yet

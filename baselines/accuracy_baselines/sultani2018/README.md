@@ -185,3 +185,11 @@ A: Download and install LAVFilters: http://forum.doom9.org/showthread.php?t=1561
 Q: What is the meaning of the second column of Train_Annotations.txt?
 A: Length of the video in frames. Note that it has not effect on training. It exists because these are the original annotations supplied by the authors.
 ```
+## BATG Project Notes
+**Cloned:** 2026-06-22
+**Commit:** cc75759fcd544c69cf38eee8c8d228ce48d620f3
+**Role:** Accuracy sanity-check baseline (classic MIL, foundational paper)
+**Features:** C3D (Drive link above) or ResNet-101/152 — NOT I3D
+**Warning:** Do NOT install their pinned requirements into main venv — conflicts with torch 2.12
+**Run in:** Separate venv on Mumtaj's GPU machine when needed
+**Patches made:** None yet

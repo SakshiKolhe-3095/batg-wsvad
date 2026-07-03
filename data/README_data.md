@@ -5,40 +5,53 @@ Large files (features, raw video) live on our **shared Google Drive folder**: ht
 
 ---
 
-## 1. UCF-Crime — Precomputed I3D Features (primary, via RTFM repo)
+## 1. UCF-Crime — Precomputed I3D Features (primary)
 
-RTFM (Tian et al., ICCV 2021) provides precomputed I3D (ResNet-50 backbone, 10-crop augmented)
-features for UCF-Crime directly — **no need to extract features ourselves.**
+**⚠️ RTFM's official download links are BROKEN — confirmed 2026-07-03.**
+GitHub issues #105, #98, #97 on tianyu0207/RTFM all confirm Google Drive and OneDrive
+links are dead. Do NOT waste time trying them.
 
-**Download links (from `tianyu0207/RTFM` official repo):**
+**Working source: DeepMIL / Roc-Ng repo**
+- Repo: https://github.com/Roc-Ng/DeepMIL
+- UCF-Crime 10-crop I3D features available here
+- Downloaded and processed by Mumtaj on 2026-07-03 ✅
 
-- UCF-Crime train I3D features (Google Drive): https://drive.google.com/file/d/1i2P9Nn62i0cVil_WS24HKzbzmyUxA9vX/view?usp=drive_link
-- UCF-Crime test I3D features (Google Drive): https://drive.google.com/file/d/1KHBLG0-cjSmbqZJc4pjvKzRMI3jeE14T/view?usp=drive_link
-- Alternative (OneDrive) versions also listed in their README if Drive link breaks:
-  - train: https://uao365-my.sharepoint.com/:f:/g/personal/a1697106_adelaide_edu_au/ErCr6bjDzzZPstgposv1ttYBjv_ZBsAbNTbwyl3yX8QCHA?e=BzNuJ2
-  - test: https://uao365-my.sharepoint.com/:f:/g/personal/a1697106_adelaide_edu_au/EsmBEpklrShEjTFOWTd5FooBkJR3DPxp3cIZN-R8b2hhLA?e=hlcZFO
-- Pretrained checkpoint for UCF-Crime (if we want a sanity baseline without training):
-  https://uao365-my.sharepoint.com/:u:/g/personal/a1697106_adelaide_edu_au/Ed0gS0RZ5hFMqVa8LxcO3sYBqFEmzMU5IsvvLWxioTatKw?e=qHEl5Z
+**What Mumtaj downloaded and processed:**
+- Train: 16,100 raw per-crop files (1610 videos × 10 crops)
+- Test: 2,900 raw per-crop files (290 videos × 10 crops)
+- Merged into shape (T, 10, 1024) per video
+- Fixed 71 shape-mismatch videos (off-by-one frame, trimmed cleanly)
+- Generated correct .list files with abnormal-first split
+- Fixed forward-slash path encoding in list files
 
-**Note on feature origin:** these I3D features were extracted using the ResNet-50 I3D backbone
-from `Tushar-N/pytorch-resnet3d` (https://github.com/Tushar-N/pytorch-resnet3d), with 10-crop
-augmentation, following prior WS-VAD convention (Sultani et al., RTFM, etc.).
+**⚠️ Feature dimension is 1024, NOT 2048.**
+DeepMIL uses a different I3D backbone than RTFM's original. Mumtaj patched
+`model.py` and `option.py` to use `feature-size=1024`. Our BATG pipeline
+must also use 1024-dim features — do not assume 2048 anywhere in src/models/.
 
-**Expected local structure after download:**
+**RTFM patches applied by Mumtaj (document here for reproducibility):**
+- `model.py` — removed 4 hardcoded 2048s, parameterized via n_features/len_feature
+- `option.py` — feature-size=1024, UCF list paths, workers=0, dataset=ucf
+- `utils.py` — np.int → int (numpy deprecation fix)
+- `test_10crop.py` — correct squeeze/mean dimensions, gt[:len(pred)] trim, CPU tensor handling
+- `main.py` — pin_memory=False, CUDA generator for shuffle, num_workers=0
+
+**Features on shared Drive:** upload in progress — check Drive folder link at top of this file.
+
+**Local structure (Mumtaj's machine):**
 ```
-data/features/
-└── ucf-crime/
-    ├── i3d/
-    │   ├── train/         # extracted train features, .npy per video
-    │   └── test/           # extracted test features, .npy per video
+data/features/ucf-crime/
+├── i3d_merged/
+│   ├── train/    # 1610 .npy files, shape (T, 10, 1024)
+│   └── test/     # 290 .npy files, shape (T, 10, 1024)
+└── list/
+    ├── ucf-i3d.list          # train list, local paths
+    └── ucf-i3d-test.list     # test list, local paths
 ```
 
-**Action needed after download:** edit the file paths inside
-`baselines/accuracy_baselines/rtfm2021/list/ucf-i3d-train-10crop.list` and
-`ucf-i3d-test-10crop.list` (or equivalent list files) to point to wherever you
-actually put the downloaded features locally. RTFM's code reads paths from these
-`.list` files, not from a config — easy to miss, check this first if training crashes
-with "file not found."
+**RTFM pipeline confirmed working end-to-end — AUC 0.5513 after 1 epoch (2026-07-03) ✅**
+(Low AUC expected at epoch 1 — needs 50-100 epochs to reach published ~84%.
+This just confirms pipeline runs without error.)
 
 ---
 
@@ -50,7 +63,14 @@ links once cloned into `baselines/accuracy_baselines/sultani2018/`. Don't assume
 I3D features are directly swappable here; Sultani's original method expects C3D or
 ResNet-based features depending on which variant of the repo we use.
 
-**TODO (whoever sets this up):** paste exact link here once confirmed from that repo.
+**Confirmed feature download links (from ekosman repo README):**
+- C3D features: https://drive.google.com/drive/folders/1rhOuAdUqyJU4hXIhToUnh5XVvYjQiN50?usp=sharing
+- ResNet-101 features: https://drive.google.com/file/d/1kQAvOhtL-sGadblfd3NmDirXq8vYQPvf/view?usp=sharing
+- ResNet-152 features: https://drive.google.com/file/d/17wdy_DS9UY37J9XTV5XCLqxOFgXiv3ZK/view
+- Pre-trained anomaly detector models: see `baselines/accuracy_baselines/sultani2018/exps/` folder (already cloned)
+
+**Note:** These are NOT the same features as DeepMIL/RTFM — different backbone (C3D/ResNet vs I3D).
+Not downloaded yet — only needed when actually running Sultani baseline reproduction.
 
 ---
 

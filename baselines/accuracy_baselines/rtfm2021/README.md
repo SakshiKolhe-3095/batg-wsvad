@@ -63,3 +63,11 @@ If you find this repo useful for your research, please consider citing our paper
 }
 ```
 ---
+## BATG Project Notes
+**Cloned:** 2026-06-22
+**Commit:** cf938f4c38c908ba19936ecfc60d54de7da0d8b9
+**Role:** Accuracy sanity-check baseline
+**Published AUC (UCF-Crime):** ~84.30%
+**Patches made:** None
+**Warning:** Needs visdom running before main.py or crashes silently
+**List files to edit:** list/ucf-i3d.list and list/ucf-i3d-test.list — update paths to local features
