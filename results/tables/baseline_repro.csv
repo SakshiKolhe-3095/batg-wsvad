@@ -1,0 +1,2 @@
+﻿baseline,dataset,epoch,AUC,notes
+RTFM-1024dim,UCF-Crime,1,0.5513,sanity check only - 1 epoch random init expected ~0.5
