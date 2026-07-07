@@ -193,3 +193,26 @@ A: Length of the video in frames. Note that it has not effect on training. It ex
 **Warning:** Do NOT install their pinned requirements into main venv — conflicts with torch 2.12
 **Run in:** Separate venv on Mumtaj's GPU machine when needed
 **Patches made:** None yet
+
+
+
+
+## Dependency Conflict Check (2026-07-05)
+
+Compared `sultani2018/requirements.txt` against root `requirements.txt`.
+Confirms earlier warning above — do NOT install into main venv.
+
+| Package | sultani2018 pin | root pin | Conflict |
+|---|---|---|---|
+| torchvision | 0.15.2 | matches torch 2.12.1 | Hard — incompatible with modern torch |
+| pandas | 2.0.3 | 3.0.3 | Major version gap |
+| scipy | 1.10.1 | 1.17.1 | Major version gap |
+| scikit-learn | 1.3.0 | 1.9.0 | Major version gap |
+| matplotlib | 3.7.2 | 3.11.0 | Moderate gap |
+| tqdm | 4.65.0 | 4.68.3 | Minor, low risk |
+| pyyaml | 6.0.1 | 6.0.3 | Minor, low risk |
+| PyQt5 | present | not in root | Dev-only, not needed for experiments |
+| pre-commit, ruff | present | not in root | Dev tools, skip |
+
+**Action:** Run Sultani in a separate venv (already flagged in handover KI-2).
+Do not attempt to reconcile pins into shared root requirements.txt.
