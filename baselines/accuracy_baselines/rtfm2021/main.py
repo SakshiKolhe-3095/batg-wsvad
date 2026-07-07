@@ -10,10 +10,14 @@ import option
 from tqdm import tqdm
 from utils import Visualizer
 from config import *
+import sys
+sys.path.append(r"C:\Users\Mumtaj Shaikh\Documents\Reserach_Internship\batg-wsvad")
+from src.utils.seed import set_seed
 
 viz = Visualizer(env='shanghai tech 10 crop', use_incoming_socket=False)
 
 if __name__ == '__main__':
+    set_seed(42)
     args = option.parser.parse_args()
     config = Config(args)
 
