@@ -32,8 +32,8 @@ def test(dataloader, model, args, viz, device):
         pr_auc = auc(recall, precision)
         np.save('precision.npy', precision)
         np.save('recall.npy', recall)
-        viz.plot_lines('pr_auc', pr_auc)
-        viz.plot_lines('auc', rec_auc)
-        viz.lines('scores', pred)
-        viz.lines('roc', tpr, fpr)
+        # viz.plot_lines('pr_auc', pr_auc)
+        # viz.plot_lines('auc', rec_auc)
+        # viz.lines('scores', pred)
+        # viz.lines('roc', tpr, fpr)
         return rec_auc

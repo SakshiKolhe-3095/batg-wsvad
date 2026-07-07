@@ -14,3 +14,12 @@ __pycache__/
 
 runs/
 wandb/
+# RTFM/BATG training artifacts
+ckpt/
+ckpt_*/
+*.pkl
+*-step-AUC.txt
+full_training_log*.txt
+short_loss_check.txt
+debug_*.py
+*.npy
