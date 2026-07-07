@@ -79,7 +79,7 @@ class SegmentScorer(nn.Module):
         """
         # TODO (Mumtaj): implement
         # Hint: torch.norm(x, dim=-1) or x.norm(p=2, dim=-1)
-        raise NotImplementedError("Mumtaj: implement _motion_energy")
+        return torch.norm(x, p=2, dim=-1)
 
     def _temporal_variance(self, x: torch.Tensor) -> torch.Tensor:
         """Signal 2: local temporal variance — how much this segment differs from neighbors.
@@ -98,7 +98,11 @@ class SegmentScorer(nn.Module):
         # That gives global variance per video — not truly local, but easy and often works
         # Better approach: for each t, compute var of x[:, max(0,t-2):t+3, :] 
         # Start simple, upgrade if AUC is weak.
-        raise NotImplementedError("Mumtaj: implement _temporal_variance")
+        B, T, D = x.shape
+        x_pad = F.pad(x.transpose(1, 2), (2, 2), mode="replicate").transpose(1, 2)
+        windows = x_pad.unfold(1, 5, 1)
+        var = windows.var(dim=-1, unbiased=False)
+        return var.mean(dim=-1)
 
     def _confidence(self, x: torch.Tensor) -> torch.Tensor:
         """Signal 3: learned confidence score from tiny MLP.
@@ -111,7 +115,7 @@ class SegmentScorer(nn.Module):
         # TODO (Mumtaj): implement
         # Hint: pass x through self.confidence_mlp, squeeze last dim
         # self.confidence_mlp expects (*, feat_dim) input, works on any batch shape
-        raise NotImplementedError("Mumtaj: implement _confidence")
+        return self.confidence_mlp(x).squeeze(-1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Compute per-segment importance score.
@@ -132,7 +136,17 @@ class SegmentScorer(nn.Module):
         #                         (energy.max(-1, keepdim=True).values - energy.min(-1, keepdim=True).values + 1e-8)
         #   5. scores = alpha * energy_norm + beta * variance_norm + gamma * conf
         #   6. return scores   # (B, T)
-        raise NotImplementedError("Mumtaj: implement forward")
+        energy   = self._motion_energy(x)
+        variance = self._temporal_variance(x)
+        conf     = self._confidence(x)
+
+        def _norm(t):
+            mn = t.min(dim=-1, keepdim=True).values
+            mx = t.max(dim=-1, keepdim=True).values
+            return (t - mn) / (mx - mn + 1e-8)
+
+        scores = self.alpha * _norm(energy) + self.beta * _norm(variance) + self.gamma * conf
+        return scores
 
 
 if __name__ == "__main__":

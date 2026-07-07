@@ -72,7 +72,8 @@ class MILHead(nn.Module):
         # Hint: self.fc expects (..., feat_dim) input, works on any leading dims
         # scores = self.fc(x).squeeze(-1)   # (B, T_kept)
         # return scores
-        raise NotImplementedError("Mumtaj: implement forward — see hint above, simple one-liner")
+        scores = self.fc(x).squeeze(-1)
+        return scores
 
     def mil_loss(self,
                  scores: torch.Tensor,
@@ -101,7 +102,19 @@ class MILHead(nn.Module):
         #   6. add smoothness loss on scores (penalize abrupt score changes)
         #      smooth_loss = torch.mean((scores[:, 1:] - scores[:, :-1])**2)
         #   7. return loss + 0.01 * smooth_loss  (0.01 = weight from RTFM paper)
-        raise NotImplementedError("Mumtaj: implement mil_loss — see RTFM train.py for reference")
+        k = max(1, int(scores.shape[1] * self.k_ratio))
+        top_scores = scores.topk(k, dim=1).values.mean(dim=1)
+
+        abnormal_scores = top_scores[labels == 1]
+        normal_scores   = top_scores[labels == 0]
+
+        if abnormal_scores.numel() == 0 or normal_scores.numel() == 0:
+            loss = torch.tensor(0.0, device=scores.device, requires_grad=True)
+        else:
+            loss = torch.clamp(1 - abnormal_scores.mean() + normal_scores.mean(), min=0)
+
+        smooth_loss = torch.mean((scores[:, 1:] - scores[:, :-1]) ** 2)
+        return loss + 0.01 * smooth_loss
 
 
 if __name__ == "__main__":

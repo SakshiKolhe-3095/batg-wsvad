@@ -26,6 +26,7 @@ Budget regularization loss (add to MIL loss during training):
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class BATGGate(nn.Module):
@@ -66,7 +67,14 @@ class BATGGate(nn.Module):
         #   3. threshold = kth score value
         #   4. mask = (scores >= threshold).float()
         # Edge case: if budget=1.0, return all-ones mask
-        raise NotImplementedError("Mumtaj: implement _hard_mask")
+        B, T = scores.shape
+        if budget >= 1.0:
+            return torch.ones_like(scores)
+        k = max(1, int(T * budget))
+        topk_vals, _ = torch.topk(scores, k, dim=1)
+        threshold = topk_vals[:, -1].unsqueeze(1)
+        mask = (scores >= threshold).float()
+        return mask
 
     def _soft_mask(self, scores: torch.Tensor, budget: float) -> torch.Tensor:
         """Soft (differentiable) approximation of hard mask for training.
@@ -87,7 +95,11 @@ class BATGGate(nn.Module):
         #      torch.quantile(scores, 1 - budget, dim=1, keepdim=True)
         #   2. soft_mask = torch.sigmoid((scores - threshold) / self.temperature)
         # This gives ~1.0 for segments well above threshold, ~0.0 for well below
-        raise NotImplementedError("Mumtaj: implement _soft_mask")
+        if budget >= 1.0:
+            return torch.ones_like(scores)
+        threshold = torch.quantile(scores, 1.0 - budget, dim=1, keepdim=True)
+        soft_mask = torch.sigmoid((scores - threshold) / self.temperature)
+        return soft_mask
 
     def budget_loss(self, mask: torch.Tensor, target_budget: float) -> torch.Tensor:
         """Budget regularization loss.
@@ -105,7 +117,9 @@ class BATGGate(nn.Module):
         # actual_fraction = mask.mean(dim=1)        # (B,) — per-video keep fraction
         # target = torch.full_like(actual_fraction, target_budget)
         # return F.mse_loss(actual_fraction, target)
-        raise NotImplementedError("Mumtaj: implement budget_loss")
+        actual_fraction = mask.mean(dim=1)
+        target = torch.full_like(actual_fraction, target_budget)
+        return F.mse_loss(actual_fraction, target)
 
     def forward(self,
                 scores: torch.Tensor,
@@ -131,7 +145,17 @@ class BATGGate(nn.Module):
         #   4. b_loss = self.budget_loss(mask, b)
         #   5. kept_fraction = mask.mean().item()
         #   6. return mask, kept_fraction, b_loss
-        raise NotImplementedError("Mumtaj: implement forward")
+        b = budget if budget is not None else self.budget
+        is_train = training if training is not None else self.training
+
+        if is_train and not self.hard_threshold:
+            mask = self._soft_mask(scores, b)
+        else:
+            mask = self._hard_mask(scores, b)
+
+        b_loss = self.budget_loss(mask, b)
+        kept_fraction = mask.mean().item()
+        return mask, kept_fraction, b_loss
 
 
 if __name__ == "__main__":
