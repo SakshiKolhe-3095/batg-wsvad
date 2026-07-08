@@ -70,3 +70,21 @@ comparison answer the question it is actually suited to answer, and keeps the
 paper's central contribution—the FLOPs–AUC curve itself—positioned correctly
 relative to both a fixed accuracy ceiling and a set of fixed efficiency
 points.
+
+# 2026-07-05
+
+Completed:
+- Recreated README stubs for all 4 baseline folders (commit hashes documented)
+- Verified CPU torch (2.12.1+cpu) and Colab torch (2.11.0+cu128) — no mismatch, KI-10 resolved
+- Documented sultani2018 requirements.txt conflicts vs root (torchvision/pandas/scipy/sklearn major version gaps)
+- Added configs/batg_base.yaml and configs/dataset_ucf.yaml
+- Wrote 3-signal justification + two-tier baseline defense paragraphs (below)
+- Filled numbers_only.md for Wang 2023 (84.7% AUC, 0.14M params), Karim 2024 (86.94% AUC, 6.4s decision period), Mohamad 2026 (91.61% AUC, 7.9M params, 0.71 GFLOPs — verify AUC protocol before final table use)
+
+Issues:
+- RTFM full training plateaus 0.57-0.62 AUC, well below published 84.3% — under active debug with Mumtaj (checked: gt-alignment GOOD, batch composition GOOD, loss curve in progress)
+- DE-Net cloned repo may be 2023 preprint version (MSTM) not 2025 TNNLS (ATM) — unverified, flagged in README
+
+Next:
+- Mumtaj: finish RTFM debug (loss/score/LR checks), then start model-file implementation
+- Sakshi: src/train.py — blocked until model files (scoring.py/batg_gate.py/mil_head.py) implemented
