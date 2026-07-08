@@ -117,3 +117,49 @@ data/
 2. All large files go to the shared Google Drive folder — link at top of this file.
 3. If you download something not listed here, add it to this README immediately so the other person doesn't redo the work or get confused about where files came from.
 4. Note exact source URL + date downloaded for anything added — links break, dates help us track if a re-download is needed later.
+
+
+
+## C3D Features (Sultani 2018 baseline)
+
+**Source:** ekosman/AnomalyDetectionCVPR2018-Pytorch precomputed C3D features
+**Drive link:** https://drive.google.com/drive/folders/1rhOuAdUqyJU4hXIhToUnh5XVvYjQiN50
+
+**Downloaded:** 2026-07-08
+**Local path:** `data/features/ucf-crime/c3d/`
+
+**Folder structure** (16 category folders, matches UCF-Crime annotation format):
+```
+data/features/ucf-crime/c3d/
+├── Abuse/
+├── Arrest/
+├── Arson/
+├── Assault/
+├── Burglary/
+├── Explosion/
+├── Fighting/
+├── Normal_Videos_for_Event_Recognition/
+├── RoadAccidents/
+├── Robbery/
+├── Shooting/
+├── Shoplifting/
+├── Stealing/
+├── Testing_Normal_Videos_Anomaly/
+├── Training_Normal_Videos_Anomaly/
+└── Vandalism/
+```
+
+**File format:** one `.txt` file per video (e.g. `Abuse001_x264.txt`), containing
+space-separated floating-point C3D feature values (verified readable,
+non-corrupted 2026-07-08).
+
+**Annotation match confirmed:** paths in `Train_Annotation.txt` /
+`Test_Annotation.txt` (e.g. `Abuse/Abuse022_x264.mp4`) match folder/file naming
+here exactly (`.mp4` → `.txt` extension swap handled by Sultani's
+`features_loader.py`, standard for precomputed-feature loaders).
+
+**Note:** Skipped `desk.zip` (828 MB) present in the shared Drive folder —
+different/unverified owner, flagged by Google as unscannable for viruses.
+Not part of the official feature set, ignored.
+
+**Status:** Ready for Sultani baseline (Phase 2, Mumtaj's task).
