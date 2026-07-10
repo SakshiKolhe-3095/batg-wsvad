@@ -40,7 +40,20 @@ class FeaturesLoader:
         ) = FeaturesLoader._get_features_list(
             features_path=self._features_path, annotation_path=annotation_path
         )
-
+        # Filter out videos whose feature file doesn't actually exist on disk
+        # (source C3D download has ~8% missing files, scattered, not fixable by retry)
+        before_n, before_a = len(self.features_list_normal), len(self.features_list_anomaly)
+        self.features_list_normal = [
+            p for p in self.features_list_normal if os.path.exists(f"{p}.txt")
+        ]
+        self.features_list_anomaly = [
+            p for p in self.features_list_anomaly if os.path.exists(f"{p}.txt")
+        ]
+        logging.warning(
+            f"FeaturesLoader:: filtered missing files — "
+            f"normal {before_n}->{len(self.features_list_normal)}, "
+            f"anomaly {before_a}->{len(self.features_list_anomaly)}"
+        )
         self._iterations = iterations
         self._features_cache = {}
         self._i = 0
@@ -48,7 +61,7 @@ class FeaturesLoader:
     def __len__(self) -> int:
         return self._iterations
 
-    def __getitem__(self, index: int, max_retries: int = 10) -> tuple[Tensor, Tensor]:
+    def __getitem__(self, index: int, max_retries: int = 50) -> tuple[Tensor, Tensor]:
         if self._i == len(self):
             self._i = 0
             raise StopIteration
@@ -148,7 +161,7 @@ class FeaturesLoaderVal(data.Dataset):
     def __len__(self) -> int:
         return len(self.features_list)
 
-    def __getitem__(self, index: int, max_retries: int = 10):
+    def __getitem__(self, index: int, max_retries: int = 50):
         succ = False
         retries = 0
         while not succ:
