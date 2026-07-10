@@ -163,3 +163,28 @@ different/unverified owner, flagged by Google as unscannable for viruses.
 Not part of the official feature set, ignored.
 
 **Status:** Ready for Sultani baseline (Phase 2, Mumtaj's task).
+
+## I3D Features (RTFM / BATG primary training data)
+
+**Note:** Original shared Drive folder (BATG-WSVAD,
+`1ddTzqVIA8Un4Fd49QZTbr-kguEJhEHcC`) has only 15GB free capacity — insufficient
+for the merged I3D feature set (~21GB). Using a separate Drive account with
+5TB capacity instead, specifically for I3D features.
+
+**New I3D Drive link:** `<PASTE LINK HERE ONCE FOLDER CREATED AND SHARED>`
+
+**Uploaded by:** Mumtaj (source: her local merged features,
+`i3d_merged/train/` + `i3d_merged/test/`)
+**Uploaded:** `<DATE ONCE DONE>`
+
+**Local path convention (unchanged):**
+```
+data/features/ucf-crime/i3d_merged/
+├── train/   # 1610 .npy files, shape (T, 10, 1024)
+└── test/    # 290 .npy files, shape (T, 10, 1024)
+```
+
+**Reminder:** this is separate from the C3D features (Sultani baseline),
+which remain on the original 15GB shared folder — see C3D section above.
+Two different Drive locations for two different feature sets; don't confuse
+the links when setting up Colab/AI Kosh notebooks.
