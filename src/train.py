@@ -33,6 +33,7 @@ from src.models.batg_gate import BATGGate
 from src.models.mil_head import MILHead
 from src.utils.seed import set_seed
 from src.utils.checkpoint import save_checkpoint, latest_checkpoint
+from src.eval import run_inference_at_budget, compute_auc
 from src.utils.logger import CSVLogger, print_log
 
 
@@ -95,7 +96,12 @@ def train(config_path: str, dataset_config_path: str, resume: bool = True):
     scorer, gate, head = build_models(cfg["model"], device)
     params = list(scorer.parameters()) + list(gate.parameters()) + list(head.parameters())
     optimizer = optim.Adam(params, lr=cfg["training"]["learning_rate"])
-
+    total_epochs = cfg["training"]["epochs"]
+    scheduler = optim.lr_scheduler.MultiStepLR(
+        optimizer,
+        milestones=[int(total_epochs * 0.4), int(total_epochs * 0.7)],
+        gamma=0.1
+    )
     budget_levels = cfg["budget_levels"]  # e.g. [0.25, 0.50, 0.75, 1.00]
     lambda_budget = cfg["training"]["lambda_budget"]
     checkpoint_dir = cfg["paths"]["checkpoint_dir"]
@@ -112,6 +118,7 @@ def train(config_path: str, dataset_config_path: str, resume: bool = True):
     # restoring each module's state_dict manually. save_checkpoint() is still
     # used as-is for saving (it's already a generic dict-saver, no change needed).
     start_epoch = 0
+    best_auc = -1.0
     if resume:
         ckpt_path = latest_checkpoint(checkpoint_dir, prefix="batg")
         if ckpt_path:
@@ -121,12 +128,12 @@ def train(config_path: str, dataset_config_path: str, resume: bool = True):
             head.load_state_dict(state["head_state_dict"])
             optimizer.load_state_dict(state["optimizer_state_dict"])
             start_epoch = state.get("epoch", -1) + 1
+            best_auc = state.get("best_auc", state.get("auc", -1.0))
             print_log(f"Resumed from {ckpt_path} at epoch {start_epoch} "
+                       f"best_auc={best_auc:.4f} "
                        f"(scorer+gate+head+optimizer all restored)")
 
-    total_epochs = cfg["training"]["epochs"]
     checkpoint_every = cfg["training"]["checkpoint_every_n_epochs"]
-
     for epoch in range(start_epoch, total_epochs):
         scorer.train()
         gate.train()
@@ -160,13 +167,42 @@ def train(config_path: str, dataset_config_path: str, resume: bool = True):
             epoch_budget_loss += b_loss.item()
             n_batches += 1
 
+        scheduler.step()
+
+        # --- Validation AUC check (catches overfitting, saves true best) ---
+        scorer.eval()
+        gate.eval()
+        head.eval()
+        val_auc = None
+        if epoch % checkpoint_every == 0 or epoch == total_epochs - 1:
+            all_scores = run_inference_at_budget(scorer, gate, head, test_ds, budget=1.0, device=device)
+            val_auc = compute_auc(all_scores, ds_cfg["paths"]["gt_file"])
+            if val_auc > best_auc:
+                best_auc = val_auc
+                save_checkpoint({
+                    "epoch": epoch,
+                    "model_state_dict": scorer.state_dict(),
+                    "gate_state_dict": gate.state_dict(),
+                    "head_state_dict": head.state_dict(),
+                    "optimizer_state_dict": optimizer.state_dict(),
+                    "auc": val_auc,
+                }, path=os.path.join(checkpoint_dir, "batg_best.pt"))
+                print_log(f"[BEST] New best val AUC={val_auc:.4f} at epoch {epoch} -> saved batg_best.pt")
+        scorer.train()
+        gate.train()
+        head.train()
+
         avg_loss = epoch_loss / max(1, n_batches)
+
         avg_mil_loss = epoch_mil_loss / max(1, n_batches)
         avg_budget_loss = epoch_budget_loss / max(1, n_batches)
 
+        current_lr = optimizer.param_groups[0]["lr"]
+        val_auc_str = f"{val_auc:.4f}" if val_auc is not None else "n/a"
         print_log(
             f"Epoch {epoch}: total_loss={avg_loss:.4f} "
             f"mil_loss={avg_mil_loss:.4f} budget_loss={avg_budget_loss:.4f} "
+            f"lr={current_lr:.6f} val_auc={val_auc_str} best_auc={best_auc:.4f} "
             f"(last batch budget={budget}, kept={kept_fraction:.2%})"
         )
         logger.log(
