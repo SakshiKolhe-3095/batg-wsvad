@@ -171,11 +171,11 @@ Not part of the official feature set, ignored.
 for the merged I3D feature set (~21GB). Using a separate Drive account with
 5TB capacity instead, specifically for I3D features.
 
-**New I3D Drive link:** `<PASTE LINK HERE ONCE FOLDER CREATED AND SHARED>`
+**New I3D Drive link:** https://drive.google.com/drive/folders/1Y1cSufziKLik3CxcguXcN1h04lhPHZ1F
 
 **Uploaded by:** Mumtaj (source: her local merged features,
 `i3d_merged/train/` + `i3d_merged/test/`)
-**Uploaded:** `<DATE ONCE DONE>`
+**Uploaded:** Folder created 2026-07-10, upload pending (Mumtaj)
 
 **Local path convention (unchanged):**
 ```
