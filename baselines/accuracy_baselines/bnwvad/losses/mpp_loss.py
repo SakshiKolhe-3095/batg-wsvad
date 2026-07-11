@@ -16,6 +16,7 @@ class MPPLoss(nn.Module):
             return torch.sqrt(torch.sum((x - mu)**2 / var, dim=-1))
         
         for anchor, var, pos, neg, wt in zip(anchors, variances, select_normals, select_abnormals, self.w_triplet):
+            var = torch.clamp(var, min=0.1)  # variance floor - prevents collapse toward zero, forces genuine separation
             triplet_loss = nn.TripletMarginWithDistanceLoss(margin=1, distance_function=partial(mahalanobis_distance, var=var))
             
             B, C, k = pos.shape

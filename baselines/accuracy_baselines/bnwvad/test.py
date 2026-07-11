@@ -10,14 +10,13 @@ def get_predicts(test_loader, net):
     load_iter = iter(test_loader)
     frame_predict = []
     
-    for i in range(len(test_loader.dataset)//5):
+    for i in range(len(test_loader.dataset)):
         _data, _label = next(load_iter)
         
         _data = _data.cuda()
         _label = _label.cuda()
         res = net(_data)   
-        
-        a_predict = res.cpu().numpy().mean(0)   
+        a_predict = res.cpu().numpy().mean(0) if res.ndim > 1 else res.cpu().numpy()
 
         fpre_ = np.repeat(a_predict, 16)
         frame_predict.append(fpre_)
@@ -44,9 +43,10 @@ def test(net, test_loader, test_info, step, model_file = None):
             net.load_state_dict(torch.load(model_file))
 
         load_iter = iter(test_loader)
-        frame_gt = np.load("frame_label/xd_gt.npy")
+        frame_gt = np.load("frame_label/ucf_gt.npy")
         
         frame_predicts = get_predicts(test_loader, net)
+        frame_gt = frame_gt[:len(frame_predicts)]
 
         metrics = get_metrics(frame_predicts, frame_gt)
         

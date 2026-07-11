@@ -14,7 +14,7 @@ class XDVideo(data.DataLoader):
         self.len_feature = len_feature
         
         self.feature_path = self.data_path
-        split_path = os.path.join("list",'XD_{}.list'.format(self.mode))
+        split_path = os.path.join("list",'UCF_{}.list'.format(self.mode))
         split_file = open(split_path, 'r',encoding="utf-8")
         self.vid_list = []
         for line in split_file:
@@ -22,9 +22,9 @@ class XDVideo(data.DataLoader):
         split_file.close()
         if self.mode == "Train":
             if is_normal is True:
-                self.vid_list = self.vid_list[9525:]
+                self.vid_list = self.vid_list[810:]
             elif is_normal is False:
-                self.vid_list = self.vid_list[:9525]
+                self.vid_list = self.vid_list[:810]
             else:
                 assert (is_normal == None)
                 print("Please sure is_normal = [True/False]")
@@ -39,20 +39,19 @@ class XDVideo(data.DataLoader):
 
     def get_data(self, index):
         vid_name = self.vid_list[index][0]
-        label=0
-        if "_label_A" not in vid_name:
-            label=1  
+        label = 0 if "Normal_Videos" in vid_name else 1
+
         video_feature = np.load(os.path.join(self.feature_path, vid_name )).astype(np.float32)
-        if self.mode == "Train":
+        if video_feature.ndim == 3:
+            video_feature = video_feature.mean(axis=1)  # (T, 10, 1024) -> (T, 1024)
+
             new_feature = np.zeros((self.num_segments, self.len_feature)).astype(np.float32)
+        sample_index = np.linspace(0, video_feature.shape[0], self.num_segments+1, dtype=np.uint16)
+        for i in range(len(sample_index)-1):
+            if sample_index[i] == sample_index[i+1]:
+                new_feature[i,:] = video_feature[sample_index[i],:]
+            else:
+                new_feature[i,:] = video_feature[sample_index[i]:sample_index[i+1],:].mean(0)
 
-            sample_index = np.linspace(0, video_feature.shape[0], self.num_segments+1, dtype=np.uint16)
-
-            for i in range(len(sample_index)-1):
-                if sample_index[i] == sample_index[i+1]:
-                    new_feature[i,:] = video_feature[sample_index[i],:]
-                else:
-                    new_feature[i,:] = video_feature[sample_index[i]:sample_index[i+1],:].mean(0)
-                    
-            video_feature = new_feature
-        return video_feature, label    
+        video_feature = new_feature
+        return video_feature, label

@@ -68,7 +68,7 @@ if __name__ == "__main__":
             worker_init_fn = worker_init_fn, drop_last = True)
     test_loader = data.DataLoader(
         XDVideo(root_dir = args.root_dir, mode = 'Test', num_segments = args.num_segments, len_feature = args.len_feature),
-            batch_size = 5,
+            batch_size = 1,
             shuffle = False, num_workers = args.num_workers,
             worker_init_fn = worker_init_fn)
 
@@ -104,15 +104,22 @@ if __name__ == "__main__":
         wandb.log(losses, step=step)
         if step % args.plot_freq == 0 and step > 0:
             metric = test(net, test_loader, test_info, step)
-
             if test_info["AP"][-1] > best_scores['best_AP']:
                 utils.save_best_record(test_info, os.path.join(args.log_path, "xd_best_record_{}.txt".format(args.seed)))
-
                 torch.save(net.state_dict(), os.path.join(args.model_path, "xd_best_{}.pkl".format(args.seed)))
             
             for n, v in metric.items():
                 best_name = 'best_' + n
                 best_scores[best_name] = v if v > best_scores[best_name] else best_scores[best_name]
 
+            csv_path = os.path.join(args.log_path, "train_metrics_{}.csv".format(args.seed))
+            write_header = not os.path.exists(csv_path)
+            with open(csv_path, "a") as f:
+                if write_header:
+                    f.write("step,train_loss,AUC,AP\n")
+                total_loss_val = sum(v.item() if hasattr(v, 'item') else v for v in losses.values())
+                f.write(f"{step},{total_loss_val:.6f},{metric['AUC']:.4f},{metric['AP']:.4f}\n")
+            print(f"[metrics] step={step} loss={total_loss_val:.4f} AUC={metric['AUC']:.4f} AP={metric['AP']:.4f}")
+ 
         wandb.log(metric, step=step)
         wandb.log(best_scores, step=step)
