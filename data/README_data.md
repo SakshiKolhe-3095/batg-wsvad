@@ -175,7 +175,9 @@ for the merged I3D feature set (~21GB). Using a separate Drive account with
 
 **Uploaded by:** Mumtaj (source: her local merged features,
 `i3d_merged/train/` + `i3d_merged/test/`)
-**Uploaded:** Folder created 2026-07-10, upload pending (Mumtaj)
+**Uploaded:** 2026-07-10/11 (train_merged + test_merged folders confirmed —
+single .npy per video, correct merged (T,10,1024) format, verified via file
+listing showing e.g. Abuse028_x264_i3d.npy as one file, not split per-crop)
 
 **Local path convention (unchanged):**
 ```
