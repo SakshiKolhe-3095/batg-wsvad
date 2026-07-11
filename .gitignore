@@ -23,3 +23,11 @@ full_training_log*.txt
 short_loss_check.txt
 debug_*.py
 *.npy
+
+# BN-WVAD logs/wandb, more Sultani scratch
+baselines/accuracy_baselines/bnwvad/logs/
+baselines/accuracy_baselines/bnwvad/wandb/
+baselines/accuracy_baselines/bnwvad/variance_floor_log.txt
+baselines/accuracy_baselines/sultani2018/.venv_sultani/
+baselines/accuracy_baselines/sultani2018/exps/tensorboard/
+baselines/accuracy_baselines/sultani2018/exps/loss.png
