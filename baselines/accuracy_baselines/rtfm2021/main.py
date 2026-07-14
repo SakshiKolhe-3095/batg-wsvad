@@ -47,23 +47,31 @@ if __name__ == '__main__':
     test_info = {"epoch": [], "test_AUC": []}
     best_AUC = -1
     output_path = ''   # put your own path here
-    auc = test(test_loader, model, args, viz, device)
 
+    start_step = 1
+    if args.checkpoint is not None and os.path.exists(args.checkpoint):
+        model.load_state_dict(torch.load(args.checkpoint, map_location=device))
+        try:
+            start_step = int(args.checkpoint.split('rtfm')[-1].split('-i3d')[0]) + 1
+        except ValueError:
+            start_step = 1
+        print(f"Resumed from {args.checkpoint} at step {start_step}")
+
+    auc = test(test_loader, model, args, viz, device)
+    loadern_iter = iter(train_nloader)
+    loadera_iter = iter(train_aloader)
     for step in tqdm(
-            range(1, args.max_epoch + 1),
-            total=args.max_epoch,
+            range(start_step, args.max_epoch + 1),
+            total=args.max_epoch - start_step + 1,
             dynamic_ncols=True
     ):
         if step > 1 and config.lr[step - 1] != config.lr[step - 2]:
             for param_group in optimizer.param_groups:
                 param_group["lr"] = config.lr[step - 1]
-
         if (step - 1) % len(train_nloader) == 0:
             loadern_iter = iter(train_nloader)
-
         if (step - 1) % len(train_aloader) == 0:
             loadera_iter = iter(train_aloader)
-
         train(loadern_iter, loadera_iter, model, args.batch_size, optimizer, viz, device)
 
         if step % 5 == 0 and step > 200:
