@@ -31,3 +31,6 @@ baselines/accuracy_baselines/bnwvad/variance_floor_log.txt
 baselines/accuracy_baselines/sultani2018/.venv_sultani/
 baselines/accuracy_baselines/sultani2018/exps/tensorboard/
 baselines/accuracy_baselines/sultani2018/exps/loss.png
+
+# Renamed checkpoint backup folders (checkpoints_*)
+checkpoints_*/
