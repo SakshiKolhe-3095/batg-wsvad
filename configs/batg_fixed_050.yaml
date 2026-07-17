@@ -1,0 +1,31 @@
+# configs/batg_base.yaml
+# BATG (Budget-Aware Temporal Gating) base training config.
+# Values sourced from handover Section 7.1 (hyperparameters) + Section 8.
+# Rule: feat_dim=1024 ALWAYS (DeepMIL features, not RTFM 2048).
+
+model:
+  feat_dim: 1024            # DeepMIL I3D features. NEVER 2048.
+  n_segments: 32            # RTFM convention
+  mean_crop: true           # average 10 crops -> (T, 1024)
+  scorer_hidden_dim: 64     # tiny MLP, keep gating cheap
+  scorer_learn_weights: false   # fixed alpha/beta/gamma to start; flip on later
+  mil_dropout: 0.7          # RTFM convention
+  mil_k_ratio: 0.5          # top-k ranking, RTFM convention
+  gate_temperature: 1.0     # soft-mask sharpness; anneal toward 0.1 if needed
+
+training:
+  epochs: 100               # RTFM ~100 epochs
+  batch_size: 32            # 16 abnormal + 16 normal
+  learning_rate: 0.001      # Adam, RTFM convention (verify)
+  optimizer: adam
+  lambda_budget: 3.0        # budget-reg loss weight; raise if budget adherence poor
+  seed: 42                  # set_seed(42) first line of every script
+  checkpoint_every_n_epochs: 5   # AI Kosh 4hr cap survival
+  num_workers: 0            # Windows: MUST be 0. Colab/AIKosh: can raise to 4
+
+budget_levels: [0.50]   # paper's 4 operating points
+
+paths:
+  checkpoint_dir: checkpoints/
+  results_dir: results/tables/
+  figures_dir: results/figures/
