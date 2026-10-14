@@ -17,8 +17,8 @@ from src.utils.seed import set_seed
 viz = Visualizer(env='shanghai tech 10 crop', use_incoming_socket=False)
 
 if __name__ == '__main__':
-    set_seed(42)
     args = option.parser.parse_args()
+    set_seed(args.seed)
     config = Config(args)
 
     train_nloader = DataLoader(Dataset(args, test_mode=False, is_normal=True),

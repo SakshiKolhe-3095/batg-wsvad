@@ -1,2 +1,2 @@
-﻿baseline,dataset,epoch,AUC,notes
-RTFM-1024dim,UCF-Crime,1,0.5513,sanity check only - 1 epoch random init expected ~0.5
+﻿baseline,dataset,feature_dim,feature_source,best_AUC,notes
+RTFM,UCF-Crime,1024,DeepMIL-RGB-only-I3D,0.6124,Converged at step 265 - feature mismatch with published 2048-dim RGB+Flow expected

@@ -60,7 +60,7 @@ class BATGGate(nn.Module):
         Returns:
             mask: (B, T) — binary, dtype float
         """
-        # TODO (Mumtaj): implement
+        # TODO : implement
         # Steps:
         #   1. k = max(1, int(T * budget))   — number of segments to keep
         #   2. find the k-th largest score per video (torch.topk)

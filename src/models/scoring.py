@@ -41,10 +41,21 @@ class SegmentScorer(nn.Module):
                  alpha: float = 1.0,
                  beta: float = 1.0,
                  gamma: float = 1.0,
-                 learn_weights: bool = False) -> None:
+                 learn_weights: bool = False,
+                 disabled_signals: list = None) -> None:
         super().__init__()
 
         self.feat_dim = feat_dim
+
+        # --- Ablation support: zero out any disabled signal's weight ---
+        # disabled_signals: list of strings from {"energy", "variance", "confidence"}
+        disabled_signals = disabled_signals or []
+        if "energy" in disabled_signals:
+            alpha = 0.0
+        if "variance" in disabled_signals:
+            beta = 0.0
+        if "confidence" in disabled_signals:
+            gamma = 0.0
 
         # --- Signal 3: tiny learned confidence MLP ---
         # TODO (Mumtaj): verify hidden_dim=64 is sufficient, can try 128 if underfitting

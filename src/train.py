@@ -47,6 +47,7 @@ def build_models(model_cfg: dict, device: torch.device):
         feat_dim=model_cfg["feat_dim"],
         hidden_dim=model_cfg["scorer_hidden_dim"],
         learn_weights=model_cfg.get("scorer_learn_weights", False),
+        disabled_signals=model_cfg.get("disabled_signals", None),
     ).to(device)
 
     gate = BATGGate(

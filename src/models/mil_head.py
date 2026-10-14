@@ -111,10 +111,10 @@ class MILHead(nn.Module):
         if abnormal_scores.numel() == 0 or normal_scores.numel() == 0:
             loss = torch.tensor(0.0, device=scores.device, requires_grad=True)
         else:
-            loss = torch.clamp(1 - abnormal_scores.mean() + normal_scores.mean(), min=0)
+            loss = torch.clamp(0.5 - abnormal_scores.mean() + normal_scores.mean(), min=0)
 
         smooth_loss = torch.mean((scores[:, 1:] - scores[:, :-1]) ** 2)
-        return loss + 0.01 * smooth_loss
+        return loss + 0.05 * smooth_loss
 
 
 if __name__ == "__main__":

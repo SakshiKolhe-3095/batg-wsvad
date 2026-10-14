@@ -10,7 +10,7 @@ model:
   scorer_hidden_dim: 64     # tiny MLP, keep gating cheap
   scorer_learn_weights: false   # fixed alpha/beta/gamma to start; flip on later
   mil_dropout: 0.7          # RTFM convention
-  mil_k_ratio: 0.2          # top-k ranking, RTFM convention
+  mil_k_ratio: 0.5          # top-k ranking, RTFM convention
   gate_temperature: 1.0     # soft-mask sharpness; anneal toward 0.1 if needed
 
 training:
@@ -18,7 +18,7 @@ training:
   batch_size: 32            # 16 abnormal + 16 normal
   learning_rate: 0.001      # Adam, RTFM convention (verify)
   optimizer: adam
-  lambda_budget: 1.0        # budget-reg loss weight; raise if budget adherence poor
+  lambda_budget: 3.0        # budget-reg loss weight; raise if budget adherence poor
   seed: 42                  # set_seed(42) first line of every script
   checkpoint_every_n_epochs: 5   # AI Kosh 4hr cap survival
   num_workers: 0            # Windows: MUST be 0. Colab/AIKosh: can raise to 4

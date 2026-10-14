@@ -6,8 +6,8 @@
 name: ucf-crime
 
 paths:
-  train_list: data/features/ucf-crime/i3d_merged/list/ucf-i3d.list
-  test_list:  data/features/ucf-crime/i3d_merged/list/ucf-i3d-test.list
+  train_list: baselines/accuracy_baselines/rtfm2021/list/ucf-i3d.list
+  test_list:  baselines/accuracy_baselines/rtfm2021/list/ucf-i3d-test.list
   gt_file:    baselines/accuracy_baselines/rtfm2021/list/gt-ucf.npy
 
 splits:
